@@ -11,6 +11,7 @@ public class Inventorymanager : MonoBehaviour
 
     [Header("Settings")]
     public int inventorySize = 24;
+    public int hotbarSize = 6;
 
 
     [Header("Refs")]
@@ -18,17 +19,39 @@ public class Inventorymanager : MonoBehaviour
     public Transform dropPos;
     public GameObject slotTemplate;
     public Transform contentHolder;
+    public Transform hotbarContentHolder;
 
 
     private Slot[] inventorySlots;
-    [SerializeField] private Slot[] allSlots;
+    private Slot[] hotbarSlots;
+
 
     private void Start()
-    {
+    {       
+        GenerateHotbarSlots();
         GenerateSlots();
     }
     private void Update()
     {
+        if (Input.GetKeyDown(KeyCode.Alpha1))
+            hotbarSlots[0].try_use();
+        if (Input.GetKeyDown(KeyCode.Alpha2))
+            hotbarSlots[1].try_use();
+        if (Input.GetKeyDown(KeyCode.Alpha3))
+            hotbarSlots[2].try_use();
+        if (Input.GetKeyDown(KeyCode.Alpha4))
+            hotbarSlots[3].try_use();
+        if (Input.GetKeyDown(KeyCode.Alpha5))
+            hotbarSlots[4].try_use();
+        if (Input.GetKeyDown(KeyCode.Alpha6))
+            hotbarSlots[5].try_use();
+
+
+
+
+
+
+
         if (Input.GetKeyDown(inventoryKey))
             opened = !opened;
         if (opened)
@@ -44,27 +67,81 @@ public class Inventorymanager : MonoBehaviour
     private void GenerateSlots()
     {
         List<Slot> inventorySlots_ = new List<Slot>();
-        List<Slot> allSlots_ = new List<Slot>();
-
-        // Gets the all slots array into local list
-        for (int i = 0; i < allSlots.Length; i++)
-        {
-            allSlots_.Add(allSlots[i]);
-        }
-
+      
         //generates slots
         for (int i = 0; i < inventorySize; i++)
         {
             Slot slot = Instantiate(slotTemplate.gameObject, contentHolder).GetComponent<Slot>();
 
             inventorySlots_.Add(slot);
-            allSlots_.Add(slot);
+         
         }
-
         inventorySlots = inventorySlots_.ToArray();
-        allSlots = allSlots_.ToArray();
+      
     }
 
+    private void GenerateHotbarSlots()
+    {
+        List<Slot> inventorySlots_ = new List<Slot>();
+        List<Slot> hotbarList= new List<Slot>();
+        //generates slots
+        for (int i = 0; i < hotbarSize; i++)
+        {
+            Slot slot = Instantiate(slotTemplate.gameObject, hotbarContentHolder).GetComponent<Slot>();
+
+            inventorySlots_.Add(slot);
+            hotbarList.Add(slot);
+
+        }
+        inventorySlots = inventorySlots_.ToArray();
+        hotbarSlots = hotbarList.ToArray();
+    }
+
+
+
+    public void DragDrop(Slot from, Slot to)
+    {
+        //swapping
+        if (from.data != to.data)
+        {
+            ItemSO data = to.data;
+            int stackSize = to.stackSize;
+
+            to.data = from.data;
+            to.stackSize = from.stackSize;
+
+            from.data = data;
+            from.stackSize = stackSize;
+        }
+        //stacking
+        else
+        {
+            if(from.data.isStackable)
+            {
+                if(from.stackSize + to.stackSize > from.data.maxStack)
+                {
+                    int amountLeft = (from.stackSize + to.stackSize) - from.data.maxStack;
+
+                    from.stackSize = amountLeft;
+                    to.stackSize = to.data.maxStack;
+                }
+            }
+            else
+            {
+                ItemSO data = to.data;
+                int stackSize = to.stackSize;
+
+                to.data = from.data;
+                to.stackSize = from.stackSize;
+
+                from.data = data;
+                from.stackSize = stackSize;
+            }
+        }
+
+        from.UpdateSlot();
+        to.UpdateSlot();
+    }
     public void AddItem(Pickup pickUp)
     {
         if (pickUp.data.isStackable)
@@ -188,11 +265,15 @@ public class Inventorymanager : MonoBehaviour
     public void DropItem(Slot slot)
     {
         Pickup pickup = Instantiate(dropModel, dropPos).AddComponent<Pickup>();
+        pickup.transform.position = dropPos.position;
+        pickup.transform.SetParent(null);
 
         pickup.data = slot.data;
         pickup.stackSize = slot.stackSize;
 
         slot.Clean();
     }
+
+  
 
 }

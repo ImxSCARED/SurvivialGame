@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics.Contracts;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -17,6 +18,20 @@ public class ItemSO : ScriptableObject
     public bool isStackable;
     public int maxStack = 1;
 
-    
-   
+    [Header("consumables")]
+    public float healthChange = 10f;
+    public float hungerChange = 10f;
+    public float thirstChange = 10f;
+
+
 }
+
+
+
+
+
+//[Header("Weapon")]
+//public float damage;
+
+//[Header("Food")]
+//public float nutrition;

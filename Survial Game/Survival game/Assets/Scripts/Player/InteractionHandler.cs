@@ -4,8 +4,9 @@ using UnityEngine;
 
 public class InteractionHandler : MonoBehaviour
 {
-  public float interactionRange = 2f;
-  public KeyCode interactionKey = KeyCode.E;
+    public LayerMask interactablelayers;
+    public float interactionRange = 2f;
+    public KeyCode interactionKey = KeyCode.E;
 
 
     private void Update()
@@ -17,7 +18,7 @@ public class InteractionHandler : MonoBehaviour
     private void interact()
    {     RaycastHit hit;
 
-        if (Physics.Raycast(transform.position, transform.forward, out hit, interactionRange))
+        if (Physics.Raycast(transform.position, transform.forward, out hit, interactionRange, interactablelayers))
       {
             Pickup pickup = hit.transform.GetComponent<Pickup>();
 
